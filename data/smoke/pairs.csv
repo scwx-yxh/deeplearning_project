@@ -1,0 +1,4 @@
+pair_id,split,lr_path,hr_path,lr_rel,hr_rel
+000000_frame_000,train,C:/Users/haoyun/Documents/Codex/2026-04-28/we-are-doing-a-deeplearning-course/data/smoke/raw/train/270p/frame_000.png,C:/Users/haoyun/Documents/Codex/2026-04-28/we-are-doing-a-deeplearning-course/data/smoke/raw/train/1080p/frame_000.png,train/270p/frame_000.png,train/1080p/frame_000.png
+000001_frame_001,train,C:/Users/haoyun/Documents/Codex/2026-04-28/we-are-doing-a-deeplearning-course/data/smoke/raw/train/270p/frame_001.png,C:/Users/haoyun/Documents/Codex/2026-04-28/we-are-doing-a-deeplearning-course/data/smoke/raw/train/1080p/frame_001.png,train/270p/frame_001.png,train/1080p/frame_001.png
+000002_frame_002,train,C:/Users/haoyun/Documents/Codex/2026-04-28/we-are-doing-a-deeplearning-course/data/smoke/raw/train/270p/frame_002.png,C:/Users/haoyun/Documents/Codex/2026-04-28/we-are-doing-a-deeplearning-course/data/smoke/raw/train/1080p/frame_002.png,train/270p/frame_002.png,train/1080p/frame_002.png
