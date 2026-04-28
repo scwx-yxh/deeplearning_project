@@ -26,8 +26,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--pairs", type=Path, required=True, help="Pairs CSV from prepare_pairs.py.")
     parser.add_argument("--out-dir", type=Path, required=True, help="Folder for normalized SR PNG outputs.")
     parser.add_argument("--model-name", default="RealESRGAN_x4plus", help="Real-ESRGAN model name.")
+    parser.add_argument("--model-path", type=Path, default=None, help="Optional custom Real-ESRGAN checkpoint.")
     parser.add_argument("--outscale", type=float, default=4.0, help="Output scale passed to inference_realesrgan.py.")
     parser.add_argument("--tile", type=int, default=0, help="Tile size. Use 128/256 on small GPUs.")
+    parser.add_argument("--gpu-id", type=int, default=None, help="Optional GPU id passed to inference_realesrgan.py.")
+    parser.add_argument("--ext", default="png", help="Output image extension passed to inference_realesrgan.py.")
     parser.add_argument("--fp32", action="store_true", help="Use fp32 inference instead of half precision.")
     parser.add_argument("--face-enhance", action="store_true", help="Enable GFPGAN face enhancement.")
     parser.add_argument("--split", default=None, help="Optional split filter: train, val, or test.")
@@ -86,7 +89,13 @@ def main() -> None:
         suffix,
         "--tile",
         str(args.tile),
+        "--ext",
+        args.ext,
     ]
+    if args.model_path:
+        command.extend(["--model_path", str(args.model_path.resolve())])
+    if args.gpu_id is not None:
+        command.extend(["--gpu-id", str(args.gpu_id)])
     if args.fp32:
         command.append("--fp32")
     if args.face_enhance:
