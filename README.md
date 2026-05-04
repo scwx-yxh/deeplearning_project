@@ -45,6 +45,39 @@ Download pretrained weights inside `external/Real-ESRGAN/weights` or `external/R
 
 Put the Kaggle/SRGD data under `data/raw`. The script can usually discover pairs automatically when paths contain resolution tokens such as `270p` and `1080p`.
 
+On your Linux server, download the Kaggle competition data into the correct local path:
+
+```bash
+pip install kaggle
+
+mkdir -p ~/.kaggle
+cp /path/to/kaggle.json ~/.kaggle/kaggle.json
+chmod 600 ~/.kaggle/kaggle.json
+
+mkdir -p data/raw
+kaggle competitions download \
+  -c super-resolution-in-video-games \
+  -p data/raw
+
+unzip -o data/raw/super-resolution-in-video-games.zip -d data/raw
+```
+
+Before running the script, open the Kaggle competition page in your browser and accept the competition rules. The dataset will be extracted to `data/raw`.
+
+If Kaggle API credentials are inconvenient, download the public SRGD copy from Hugging Face instead:
+
+```bash
+pip install -U 'huggingface_hub[hf_xet]'
+
+mkdir -p data/raw
+huggingface-cli download epishchik/SRGD \
+  --repo-type dataset \
+  --local-dir data/raw \
+  --include "data/GameEngineData/**"
+```
+
+`GameEngineData` is the best first subset for this project. To download `DownscaleData` instead, replace `data/GameEngineData/**` with `data/DownscaleData/**`.
+
 ```bash
 python scripts/prepare_pairs.py \
   --data-root data/raw \
