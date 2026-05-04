@@ -41,6 +41,20 @@ python setup.py develop
 
 Download pretrained weights inside `external/Real-ESRGAN/weights` or `external/Real-ESRGAN/experiments/pretrained_models` following the official README/training guide.
 
+## Kaggle Notebook
+
+Use [`notebooks/kaggle_realesrgan_t4x2.ipynb`](notebooks/kaggle_realesrgan_t4x2.ipynb) on Kaggle.
+
+Recommended Kaggle settings:
+
+- Accelerator: `GPU T4 x2`
+- Internet: `On`
+- Add data: the SRGD / Super Resolution in Video Games dataset
+
+The notebook starts in `RUN_MODE = "smoke"` so it only uses a small subset and a short fine-tuning run. After the full pipeline works, switch to `RUN_MODE = "full"` in the first code cell and adjust `BATCH_SIZE_PER_GPU` if T4 memory is tight.
+
+The notebook covers dependency installation, dataset pair discovery, bicubic and Real-ESRGAN baselines, dual-GPU Real-ESRGAN fine-tuning, visual grids, and a course-project metric table with PSNR, SSIM, and LPIPS. Competition `submission.csv` generation is disabled by default because it is not needed for the course project.
+
 ## 1. Prepare Dataset Pairs
 
 Put the Kaggle/SRGD data under `data/raw`. The script can usually discover pairs automatically when paths contain resolution tokens such as `270p` and `1080p`.
