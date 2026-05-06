@@ -132,8 +132,20 @@ class DISTSEvaluator:
     """
 
     def __init__(self, device: str | None = None) -> None:
+        import os
+        import shutil
+        import sys
         import torch
+        import DISTS_pytorch as _dists_pkg
         from DISTS_pytorch import DISTS
+
+        # DISTS_pytorch loads weights from sys.prefix/weights.pt, but pip
+        # installs the file inside the package directory. Copy it if missing.
+        weights_target = os.path.join(sys.prefix, "weights.pt")
+        if not os.path.exists(weights_target):
+            weights_src = os.path.join(os.path.dirname(_dists_pkg.__file__), "weights.pt")
+            if os.path.exists(weights_src):
+                shutil.copy2(weights_src, weights_target)
 
         self.torch = torch
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
