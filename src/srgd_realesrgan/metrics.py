@@ -68,6 +68,7 @@ class MetricResult:
     psnr: float
     ssim: float
     lpips: float | None = None
+    dists: float | None = None
 
 
 def calculate_metrics(
@@ -77,6 +78,7 @@ def calculate_metrics(
     crop: int = 4,
     y_channel: bool = False,
     lpips_evaluator: Any | None = None,
+    dists_evaluator: Any | None = None,
 ) -> MetricResult:
     sr = load_rgb01(sr_path)
     hr = load_rgb01(hr_path)
@@ -88,11 +90,15 @@ def calculate_metrics(
     lpips_score = None
     if lpips_evaluator is not None:
         lpips_score = float(lpips_evaluator(sr_eval, hr_eval))
+    dists_score = None
+    if dists_evaluator is not None:
+        dists_score = float(dists_evaluator(sr_eval, hr_eval))
 
     return MetricResult(
         psnr=calculate_psnr(sr_eval, hr_eval),
         ssim=calculate_ssim(sr_eval, hr_eval, y_channel=y_channel),
         lpips=lpips_score,
+        dists=dists_score,
     )
 
 
@@ -117,3 +123,30 @@ class LPIPSEvaluator:
         tensor = self.torch.from_numpy(image.transpose(2, 0, 1)).float().unsqueeze(0)
         tensor = tensor.to(self.device)
         return tensor * 2.0 - 1.0
+
+
+class DISTSEvaluator:
+    """DISTS: perceptual + texture similarity, invariant to texture shifts.
+
+    Lower is better (like LPIPS). Requires: pip install DISTS-pytorch
+    """
+
+    def __init__(self, device: str | None = None) -> None:
+        import torch
+        from DISTS_pytorch import DISTS
+
+        self.torch = torch
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.loss_fn = DISTS().to(self.device).eval()
+
+    def __call__(self, sr: np.ndarray, hr: np.ndarray) -> float:
+        sr_tensor = self._to_tensor(sr)
+        hr_tensor = self._to_tensor(hr)
+        with self.torch.no_grad():
+            value = self.loss_fn(sr_tensor, hr_tensor)
+        return float(value.item())
+
+    def _to_tensor(self, image: np.ndarray):
+        # DISTS expects [0, 1] float tensors, shape (1, 3, H, W)
+        tensor = self.torch.from_numpy(image.transpose(2, 0, 1)).float().unsqueeze(0)
+        return tensor.to(self.device)

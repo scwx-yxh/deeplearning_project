@@ -17,7 +17,7 @@ except ImportError:
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from srgd_realesrgan.metrics import LPIPSEvaluator, calculate_metrics
+from srgd_realesrgan.metrics import DISTSEvaluator, LPIPSEvaluator, calculate_metrics
 from srgd_realesrgan.paths import IMAGE_EXTENSIONS, ensure_dir, read_pairs_csv, write_csv
 
 
@@ -69,6 +69,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--resize-sr", action="store_true", help="Resize SR outputs to HR size before metrics.")
     parser.add_argument("--lpips", action="store_true", help="Also compute LPIPS. Requires lpips + torch.")
     parser.add_argument("--lpips-net", default="alex", help="LPIPS backbone: alex, vgg, or squeeze.")
+    parser.add_argument("--dists", action="store_true", help="Also compute DISTS. Requires DISTS-pytorch.")
     return parser.parse_args()
 
 
@@ -76,6 +77,7 @@ def main() -> None:
     args = parse_args()
     rows = read_pairs_csv(args.pairs, split=args.split, limit=args.limit, shuffle=args.shuffle, seed=args.seed)
     lpips_evaluator = LPIPSEvaluator(net=args.lpips_net) if args.lpips else None
+    dists_evaluator = DISTSEvaluator() if args.dists else None
     temp_dir = ensure_dir(args.sr_dir / "_resized_for_metrics")
 
     metric_rows: list[dict[str, object]] = []
@@ -91,6 +93,7 @@ def main() -> None:
             crop=args.crop,
             y_channel=args.y_channel,
             lpips_evaluator=lpips_evaluator,
+            dists_evaluator=dists_evaluator,
         )
         metric_rows.append(
             {
@@ -101,10 +104,11 @@ def main() -> None:
                 "psnr": result.psnr,
                 "ssim": result.ssim,
                 "lpips": result.lpips,
+                "dists": result.dists,
             }
         )
 
-    fieldnames = ["pair_id", "split", "sr_path", "hr_path", "psnr", "ssim", "lpips"]
+    fieldnames = ["pair_id", "split", "sr_path", "hr_path", "psnr", "ssim", "lpips", "dists"]
     write_csv(args.out, metric_rows, fieldnames)
 
     summary = {
@@ -112,6 +116,7 @@ def main() -> None:
         "psnr_mean": mean([float(row["psnr"]) for row in metric_rows]),
         "ssim_mean": mean([float(row["ssim"]) for row in metric_rows]),
         "lpips_mean": mean([row["lpips"] for row in metric_rows if row["lpips"] is not None]),
+        "dists_mean": mean([row["dists"] for row in metric_rows if row["dists"] is not None]),
     }
     print(json.dumps(summary, indent=2))
 

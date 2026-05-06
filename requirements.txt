@@ -9,3 +9,4 @@ PyYAML>=6.0
 torch>=2.0
 torchvision>=0.15
 lpips>=0.1.4
+DISTS-pytorch>=0.1
