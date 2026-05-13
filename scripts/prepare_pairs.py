@@ -111,10 +111,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--out", type=Path, default=Path("data/pairs.csv"), help="Output pairs CSV.")
     parser.add_argument("--meta-info", type=Path, default=None, help="Optional Real-ESRGAN pair metadata txt.")
     parser.add_argument("--limit", type=int, default=None, help="Optional maximum number of pairs.")
+    parser.add_argument("--test-ratio", type=float, default=0.0,
+                        help="Fraction of pairs to hold out as test split (0 = no test split).")
+    parser.add_argument("--test-seed", type=int, default=42,
+                        help="Random seed for the reproducible train/test split.")
     return parser.parse_args()
 
 
 def main() -> None:
+    import random
+
     args = parse_args()
     data_root = args.data_root.resolve()
 
@@ -127,18 +133,29 @@ def main() -> None:
     if args.limit is not None:
         rows = rows[: args.limit]
 
+    if args.test_ratio > 0.0:
+        rng = random.Random(args.test_seed)
+        pair_ids = [r["pair_id"] for r in rows]
+        rng.shuffle(pair_ids)
+        n_test = max(1, round(len(pair_ids) * args.test_ratio))
+        test_ids = set(pair_ids[:n_test])
+        for row in rows:
+            row["split"] = "test" if row["pair_id"] in test_ids else "train"
+
+    train_rows = [row for row in rows if row["split"] != "test"]
+
     fieldnames = ["pair_id", "split", "lr_path", "hr_path", "lr_rel", "hr_rel"]
     write_csv(args.out, rows, fieldnames)
     if args.meta_info:
-        write_meta_info(rows, args.meta_info)
+        write_meta_info(train_rows, args.meta_info)
 
     split_counts: dict[str, int] = {}
     for row in rows:
         split_counts[row["split"]] = split_counts.get(row["split"], 0) + 1
 
-    print(f"Wrote {len(rows)} pairs to {args.out}")
+    print(f"Wrote {len(rows)} pairs to {args.out}  (train={len(train_rows)}, test={len(rows)-len(train_rows)})")
     if args.meta_info:
-        print(f"Wrote Real-ESRGAN metadata to {args.meta_info}")
+        print(f"Wrote Real-ESRGAN metadata ({len(train_rows)} train rows) to {args.meta_info}")
     print(f"Split counts: {split_counts}")
 
 

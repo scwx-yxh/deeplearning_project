@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Concise SRGD Real-ESRGAN Model Schematic</title>
+  <desc id="desc">Concise schematic of the SRGD Real-ESRGAN fine-tuning setup: LR input passes through RRDBNet generator to produce SR output; HR target creates USM target for reconstruction losses; HR and SR are scored by a U-Net discriminator for adversarial loss.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#243042"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#176b87"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#a5443f"/>
+    </marker>
+    <linearGradient id="lrGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4c7bd9"/>
+      <stop offset="1" stop-color="#2f405f"/>
+    </linearGradient>
+    <linearGradient id="hrGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#38a169"/>
+      <stop offset="1" stop-color="#1f6f58"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#111827" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .bg { fill: #f7f9fc; }
+      .title { font: 700 30px Arial, Helvetica, sans-serif; fill: #1d2635; }
+      .subtitle { font: 400 15px Arial, Helvetica, sans-serif; fill: #647086; }
+      .label { font: 700 18px Arial, Helvetica, sans-serif; fill: #1d2635; }
+      .small { font: 400 13px Arial, Helvetica, sans-serif; fill: #536074; }
+      .mini { font: 700 12px Arial, Helvetica, sans-serif; fill: #536074; }
+      .formula { font: 700 16px Arial, Helvetica, sans-serif; fill: #1f2937; }
+      .box { stroke-width: 1.4; filter: url(#shadow); }
+      .data { fill: #ffffff; stroke: #cbd5e1; }
+      .gen { fill: #eaf6f1; stroke: #86bea8; }
+      .rec { fill: #fff5db; stroke: #e6b84f; }
+      .gan { fill: #fdecec; stroke: #df928c; }
+      .out { fill: #eef3ff; stroke: #9eb4ef; }
+      .line { fill: none; stroke: #243042; stroke-width: 2.4; marker-end: url(#arrow); }
+      .blue { fill: none; stroke: #176b87; stroke-width: 2.4; marker-end: url(#arrow-blue); }
+      .red { fill: none; stroke: #a5443f; stroke-width: 2.4; marker-end: url(#arrow-red); }
+      .soft { fill: none; stroke: #9aa4b2; stroke-width: 1.8; stroke-dasharray: 6 7; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1200" height="720"/>
+
+  <text class="title" x="54" y="58">Real-ESRGAN Fine-Tuning</text>
+
+  <!-- Main inference path -->
+  <rect class="box data" x="70" y="160" width="180" height="140" rx="10"/>
+  <rect x="94" y="188" width="66" height="66" rx="8" fill="url(#lrGrad)"/>
+  <path d="M100 239 L118 218 L132 232 L148 203 L160 222" fill="none" stroke="#dce9ff" stroke-width="4"/>
+  <rect x="172" y="188" width="44" height="44" fill="#dfe8ff"/>
+  <path d="M172 210 H216 M194 188 V232" stroke="#8094c7" stroke-width="1.5"/>
+  <text class="label" x="95" y="276">LR input</text>
+  <text class="small" x="95" y="296">x</text>
+
+  <rect class="box gen" x="370" y="145" width="300" height="170" rx="12"/>
+  <text class="label" x="405" y="190">Generator G</text>
+  <text class="formula" x="405" y="220">RRDBNet x4</text>
+  <text class="small" x="405" y="248">23 RRDB blocks</text>
+  <text class="small" x="405" y="270">64 features, 32 growth channels</text>
+
+  <rect class="box out" x="790" y="160" width="180" height="140" rx="10"/>
+  <rect x="814" y="188" width="84" height="66" rx="8" fill="url(#hrGrad)"/>
+  <path d="M822 239 L844 214 L858 230 L879 198 L896 222" fill="none" stroke="#d9fff0" stroke-width="4"/>
+  <text class="label" x="815" y="276">SR output</text>
+  <text class="small" x="815" y="296">y_hat = G(x)</text>
+
+  <path class="line" d="M250 230 L370 230"/>
+  <path class="line" d="M670 230 L790 230"/>
+
+  <!-- Target branch -->
+  <rect class="box data" x="70" y="440" width="180" height="120" rx="10"/>
+  <rect x="95" y="468" width="70" height="48" rx="7" fill="url(#hrGrad)"/>
+  <path d="M102 505 L120 486 L135 499 L151 476 L164 492" fill="none" stroke="#d9fff0" stroke-width="3"/>
+  <text class="label" x="95" y="542">HR target</text>
+  <text class="small" x="190" y="542">y</text>
+
+  <rect class="box rec" x="370" y="425" width="235" height="150" rx="12"/>
+  <text class="label" x="405" y="468">USM target</text>
+  <text class="formula" x="405" y="498">y_usm</text>
+  <text class="small" x="405" y="526">for L1 and VGG losses</text>
+
+  <rect class="box rec" x="750" y="405" width="295" height="170" rx="12"/>
+  <text class="label" x="786" y="450">Reconstruction loss</text>
+  <text class="formula" x="786" y="482">L1(y_hat, y_usm)</text>
+  <text class="formula" x="786" y="512">+ VGG19 perceptual</text>
+
+  <path class="blue" d="M250 500 L370 500"/>
+  <path class="blue" d="M605 500 L750 500"/>
+  <path class="blue" d="M880 300 C878 346, 878 374, 878 405"/>
+
+  <!-- GAN branch -->
+  <rect class="box gan" x="1030" y="165" width="118" height="128" rx="10"/>
+  <text class="label" x="1056" y="204">GAN</text>
+  <text class="small" x="1051" y="232">real/fake</text>
+  <text class="small" x="1051" y="254">score</text>
+
+  <rect class="box gan" x="1025" y="430" width="125" height="130" rx="10"/>
+  <text class="label" x="1032" y="468">Discriminator</text>
+  <text class="small" x="1048" y="496">U-Net SN</text>
+  <text class="small" x="1048" y="520">real/fake</text>
+
+  <rect class="box out" x="450" y="625" width="320" height="58" rx="10"/>
+  <text class="formula" x="482" y="662">G loss = L1 + VGG + 0.1 GAN</text>
+
+  <rect class="box gan" x="825" y="625" width="295" height="58" rx="10"/>
+  <text class="formula" x="857" y="662">D loss = BCE(real) + BCE(fake)</text>
+
+  <path class="red" d="M970 230 L1030 230"/>
+  <path class="red" d="M970 250 C1010 300, 1040 355, 1062 430"/>
+  <path class="red" d="M250 500 C508 610, 820 610, 1025 500"/>
+  <path class="soft" d="M1030 490 C950 562, 808 608, 770 640"/>
+  <path class="soft" d="M897 575 C828 594, 760 616, 705 625"/>
+
+  <text class="mini" x="270" y="210">super-resolve</text>
+  <text class="mini" x="702" y="210">4x image</text>
+  <text class="mini" x="270" y="486">USM sharpen</text>
+  <text class="mini" x="638" y="486">compare</text>
+  <text class="mini" x="964" y="218">adversarial</text>
+  <text class="mini" x="590" y="606">updates G</text>
+  <text class="mini" x="950" y="606">updates D</text>
+</svg>
